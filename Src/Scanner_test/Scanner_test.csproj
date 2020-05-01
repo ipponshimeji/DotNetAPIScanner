@@ -5,9 +5,9 @@
 
     <IsPackable>false</IsPackable>
 
-    <AssemblyName>Scanner.Test</AssemblyName>
+    <AssemblyName>DotNetAPIScanner.Scanner.Test</AssemblyName>
 
-    <RootNamespace>Scanner</RootNamespace>
+    <RootNamespace>DotNetAPIScanner.Scanner</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

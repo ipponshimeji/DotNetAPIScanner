@@ -5,7 +5,7 @@ using System.Reflection;
 using Zafu.ReflectionScanning;
 
 
-namespace Scanner {
+namespace DotNetAPIScanner.Scanner {
 	public class Filter: IReflectionFilter {
 		#region data
 

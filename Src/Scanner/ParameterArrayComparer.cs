@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 
 
-namespace Scanner {
+namespace DotNetAPIScanner.Scanner {
 	public class ParameterArrayComparer: IComparer<ParameterInfo[]> {
 		#region data
 

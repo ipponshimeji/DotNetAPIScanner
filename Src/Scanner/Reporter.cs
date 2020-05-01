@@ -2,7 +2,7 @@
 using Zafu.ReflectionScanning;
 
 
-namespace Scanner {
+namespace DotNetAPIScanner.Scanner {
 	public class Reporter: ReflectionHandler, IDisposable {
 		#region initialization & disposal
 

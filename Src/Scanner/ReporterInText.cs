@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 
 
-namespace Scanner {
+namespace DotNetAPIScanner.Scanner {
 	public class ReporterInText: Reporter {
 		#region data
 

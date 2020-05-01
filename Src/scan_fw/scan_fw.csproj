@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7D1F45CB-BB52-4C8D-9D28-73DF930068DC}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>DotNetAPIScanner.Scanner</RootNamespace>
-    <AssemblyName>DotNetAPIScanner.Scanner</AssemblyName>
+    <ProjectGuid>{C52D4741-65CD-434B-ABE8-AAF68A7BE7BB}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>DotNetAPIScanner.Scan</RootNamespace>
+    <AssemblyName>scan</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -32,9 +32,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -46,19 +43,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ScanCommand.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Reporter.cs" />
-    <Compile Include="ReporterInIndentedText.cs" />
-    <Compile Include="ParameterArrayComparer.cs" />
-    <Compile Include="Util.cs" />
-    <Compile Include="ReporterInText.cs" />
-    <Compile Include="Filter.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ReflectionScanning\ReflectionScanning.csproj">
-      <Project>{42ea2bc1-1b6d-45c3-ae6d-00137fe09067}</Project>
-      <Name>ReflectionScanning</Name>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Scanner\Scanner.csproj">
+      <Project>{7d1f45cb-bb52-4c8d-9d28-73df930068dc}</Project>
+      <Name>Scanner</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

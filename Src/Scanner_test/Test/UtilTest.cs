@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using Xunit;
-using Scanner;
-using System.Reflection;
 using System.Linq;
+using System.Reflection;
+using Xunit;
+using DotNetAPIScanner.Scanner;
 
-namespace Scanner.Test {
+namespace DotNetAPIScanner.Scanner.Test {
 	public class UtilTest {
 		#region samples
 
