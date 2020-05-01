@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 
+
 namespace Zafu.ReflectionScanning {
 	public class ReflectionScanner {
 		#region data
@@ -32,7 +33,7 @@ namespace Zafu.ReflectionScanning {
 		#region methods
 
 		// Listener interface model is prefered to event model here.
-		// It would be efficient for the scanning scenario.
+		// It would be more efficient for the scanning scenario.
 
 		public void AddHandler(IReflectionHandler handler) {
 			// check arguments
@@ -103,6 +104,10 @@ namespace Zafu.ReflectionScanning {
 
 			void scan(Type t) {
 				ScanFields(this.Filter.GetFields(t));
+				ScanProperties(this.Filter.GetProperties(t));
+				ScanConstructors(this.Filter.GetConstructors(t));
+				ScanMethods(this.Filter.GetMethods(t));
+				ScanEvents(this.Filter.GetEvents(t));
 			}
 			return ScanItem<Type>(type, OnTypeScanning, scan, OnTypeScanned);
 		}
@@ -125,10 +130,82 @@ namespace Zafu.ReflectionScanning {
 			return OnField(field);
 		}
 
+		public bool ScanProperties(IReadOnlyCollection<PropertyInfo> props) {
+			// check argument
+			if (props == null) {
+				throw new ArgumentNullException(nameof(props));
+			}
+
+			return ScanCollection<PropertyInfo>(props, OnPropertiesScanning, ScanProperty, OnPropertiesScanned);
+		}
+
+		public bool ScanProperty(PropertyInfo prop) {
+			// check argument
+			if (prop == null) {
+				throw new ArgumentNullException(nameof(prop));
+			}
+
+			return OnProperty(prop);
+		}
+
+		public bool ScanConstructors(IReadOnlyCollection<ConstructorInfo> ctors) {
+			// check argument
+			if (ctors == null) {
+				throw new ArgumentNullException(nameof(ctors));
+			}
+
+			return ScanCollection<ConstructorInfo>(ctors, OnConstructorsScanning, ScanConstructor, OnConstructorsScanned);
+		}
+
+		public bool ScanConstructor(ConstructorInfo ctor) {
+			// check argument
+			if (ctor == null) {
+				throw new ArgumentNullException(nameof(ctor));
+			}
+
+			return OnConstructor(ctor);
+		}
+
+		public bool ScanMethods(IReadOnlyCollection<MethodInfo> methods) {
+			// check argument
+			if (methods == null) {
+				throw new ArgumentNullException(nameof(methods));
+			}
+
+			return ScanCollection<MethodInfo>(methods, OnMethodsScanning, ScanMethod, OnMethodsScanned);
+		}
+
+		public bool ScanMethod(MethodInfo method) {
+			// check argument
+			if (method == null) {
+				throw new ArgumentNullException(nameof(method));
+			}
+
+			return OnMethod(method);
+		}
+
+		public bool ScanEvents(IReadOnlyCollection<EventInfo> events) {
+			// check argument
+			if (events == null) {
+				throw new ArgumentNullException(nameof(events));
+			}
+
+			return ScanCollection<EventInfo>(events, OnEventsScanning, ScanEvent, OnEventsScanned);
+		}
+
+		public bool ScanEvent(EventInfo evt) {
+			// check argument
+			if (evt == null) {
+				throw new ArgumentNullException(nameof(evt));
+			}
+
+			return OnEvent(evt);
+		}
+
 		#endregion
 
 
-		#region methods -patterns
+		#region methods - patterns
 
 		private bool ScanCollection<T>(IReadOnlyCollection<T> collection, Action<IReadOnlyCollection<T>> onScanning, Func<T, bool> scan, Action<IReadOnlyCollection<T>, bool, Exception> onScanned) {
 			// check arguments
@@ -322,6 +399,154 @@ namespace Zafu.ReflectionScanning {
 
 			// call the handler
 			return handler.OnField(field);
+		}
+
+		protected virtual void OnPropertiesScanning(IReadOnlyCollection<PropertyInfo> props) {
+			// check argument
+			Debug.Assert(props != null);
+
+			// check state
+			IReflectionHandler handler = this.handler;
+			Debug.Assert(handler != null);
+
+			// call the handler
+			handler.OnPropertiesScanning(props);
+		}
+
+		protected virtual void OnPropertiesScanned(IReadOnlyCollection<PropertyInfo> props, bool canceled, Exception error) {
+			// check arguments
+			Debug.Assert(props != null);
+			// error can be null
+
+			// check state
+			IReflectionHandler handler = this.handler;
+			Debug.Assert(handler != null);
+
+			// call the handler
+			handler.OnPropertiesScanned(props, canceled, error);
+		}
+
+		protected virtual bool OnProperty(PropertyInfo prop) {
+			// check argument
+			Debug.Assert(prop != null);
+
+			// check state
+			IReflectionHandler handler = this.handler;
+			Debug.Assert(handler != null);
+
+			// call the handler
+			return handler.OnProperty(prop);
+		}
+
+		protected virtual void OnConstructorsScanning(IReadOnlyCollection<ConstructorInfo> ctors) {
+			// check argument
+			Debug.Assert(ctors != null);
+
+			// check state
+			IReflectionHandler handler = this.handler;
+			Debug.Assert(handler != null);
+
+			// call the handler
+			handler.OnConstructorsScanning(ctors);
+		}
+
+		protected virtual void OnConstructorsScanned(IReadOnlyCollection<ConstructorInfo> ctors, bool canceled, Exception error) {
+			// check arguments
+			Debug.Assert(ctors != null);
+			// error can be null
+
+			// check state
+			IReflectionHandler handler = this.handler;
+			Debug.Assert(handler != null);
+
+			// call the handler
+			handler.OnConstructorsScanned(ctors, canceled, error);
+		}
+
+		protected virtual bool OnConstructor(ConstructorInfo ctor) {
+			// check argument
+			Debug.Assert(ctor != null);
+
+			// check state
+			IReflectionHandler handler = this.handler;
+			Debug.Assert(handler != null);
+
+			// call the handler
+			return handler.OnConstructor(ctor);
+		}
+
+		protected virtual void OnMethodsScanning(IReadOnlyCollection<MethodInfo> methods) {
+			// check argument
+			Debug.Assert(methods != null);
+
+			// check state
+			IReflectionHandler handler = this.handler;
+			Debug.Assert(handler != null);
+
+			// call the handler
+			handler.OnMethodsScanning(methods);
+		}
+
+		protected virtual void OnMethodsScanned(IReadOnlyCollection<MethodInfo> methods, bool canceled, Exception error) {
+			// check arguments
+			Debug.Assert(methods != null);
+			// error can be null
+
+			// check state
+			IReflectionHandler handler = this.handler;
+			Debug.Assert(handler != null);
+
+			// call the handler
+			handler.OnMethodsScanned(methods, canceled, error);
+		}
+
+		protected virtual bool OnMethod(MethodInfo method) {
+			// check argument
+			Debug.Assert(method != null);
+
+			// check state
+			IReflectionHandler handler = this.handler;
+			Debug.Assert(handler != null);
+
+			// call the handler
+			return handler.OnMethod(method);
+		}
+
+		protected virtual void OnEventsScanning(IReadOnlyCollection<EventInfo> events) {
+			// check argument
+			Debug.Assert(events != null);
+
+			// check state
+			IReflectionHandler handler = this.handler;
+			Debug.Assert(handler != null);
+
+			// call the handler
+			handler.OnEventsScanning(events);
+		}
+
+		protected virtual void OnEventsScanned(IReadOnlyCollection<EventInfo> events, bool canceled, Exception error) {
+			// check arguments
+			Debug.Assert(events != null);
+			// error can be null
+
+			// check state
+			IReflectionHandler handler = this.handler;
+			Debug.Assert(handler != null);
+
+			// call the handler
+			handler.OnEventsScanned(events, canceled, error);
+		}
+
+		protected virtual bool OnEvent(EventInfo evt) {
+			// check argument
+			Debug.Assert(evt != null);
+
+			// check state
+			IReflectionHandler handler = this.handler;
+			Debug.Assert(handler != null);
+
+			// call the handler
+			return handler.OnEvent(evt);
 		}
 
 		#endregion

@@ -12,7 +12,8 @@ namespace Scanner {
 	class Program {
 		static void Main(string[] args) {
 			Assembly[] assemblies = new Assembly[] {
-				Assembly.Load("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")
+//				Assembly.Load("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")
+				Assembly.Load("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")
 			};
 			IReflectionFilter filter = Filter.Instance;
 

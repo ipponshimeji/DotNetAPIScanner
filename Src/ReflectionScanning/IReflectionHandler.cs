@@ -26,5 +26,29 @@ namespace Zafu.ReflectionScanning {
 		void OnFieldsScanned(IReadOnlyCollection<FieldInfo> fields, bool canceled, Exception error);
 
 		bool OnField(FieldInfo field);
+
+		void OnPropertiesScanning(IReadOnlyCollection<PropertyInfo> props);
+
+		void OnPropertiesScanned(IReadOnlyCollection<PropertyInfo> props, bool canceled, Exception error);
+
+		bool OnProperty(PropertyInfo prop);
+
+		void OnConstructorsScanning(IReadOnlyCollection<ConstructorInfo> ctors);
+
+		void OnConstructorsScanned(IReadOnlyCollection<ConstructorInfo> ctors, bool canceled, Exception error);
+
+		bool OnConstructor(ConstructorInfo ctor);
+
+		void OnMethodsScanning(IReadOnlyCollection<MethodInfo> methods);
+
+		void OnMethodsScanned(IReadOnlyCollection<MethodInfo> methods, bool canceled, Exception error);
+
+		bool OnMethod(MethodInfo method);
+
+		void OnEventsScanning(IReadOnlyCollection<EventInfo> events);
+
+		void OnEventsScanned(IReadOnlyCollection<EventInfo> events, bool canceled, Exception error);
+
+		bool OnEvent(EventInfo evt);
 	}
 }

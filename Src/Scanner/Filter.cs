@@ -58,18 +58,18 @@ namespace Scanner {
 			// check argument
 			Debug.Assert(type != null);
 
-			// return list of fields exposed outside the assembly
+			// return list of fields exposed outside of the assembly
 			return type.GetFields(defaultBindingFlags)
 					   .Where(IsExposedField)
 					   .OrderBy(f => f.Name, StringComparer.Ordinal)
 					   .ToArray();
 		}
 
-		private static bool IsExposedField(FieldInfo fieldInfo) {
+		private static bool IsExposedField(FieldInfo field) {
 			// check argument
-			Debug.Assert(fieldInfo != null);
+			Debug.Assert(field != null);
 
-			switch (fieldInfo.Attributes & FieldAttributes.FieldAccessMask) {
+			switch (field.Attributes & FieldAttributes.FieldAccessMask) {
 				case FieldAttributes.Public:
 				case FieldAttributes.Family:
 				case FieldAttributes.FamORAssem:
@@ -81,18 +81,66 @@ namespace Scanner {
 		}
 
 		public PropertyInfo[] GetProperties(Type type) {
+			// properties are checked by its accessor methods.
 			return Array.Empty<PropertyInfo>();
 		}
 
 		public ConstructorInfo[] GetConstructors(Type type) {
-			return Array.Empty<ConstructorInfo>();
+			// check argument
+			Debug.Assert(type != null);
+
+			// return list of constructors exposed outside of the assembly
+			return type.GetConstructors(defaultBindingFlags)
+					   .Where(IsExposedConstructor)
+					   .OrderBy(c => c.GetParameters(), ParameterArrayComparer.Instance)
+					   .ToArray();
+		}
+
+		private static bool IsExposedMethodBase(MethodBase method) {
+			// check argument
+			Debug.Assert(method != null);
+
+			switch (method.Attributes & MethodAttributes.MemberAccessMask) {
+				case MethodAttributes.Public:
+				case MethodAttributes.Family:
+				case MethodAttributes.FamORAssem:
+					return true;
+				default:
+					// include MethodAttributes.Private, FamAndAssem, Assembly
+					return false;
+			}
+		}
+
+		private static bool IsExposedConstructor(ConstructorInfo ctor) {
+			// check argument
+			Debug.Assert(ctor != null);
+
+			return IsExposedMethodBase(ctor);
 		}
 
 		public MethodInfo[] GetMethods(Type type) {
-			return Array.Empty<MethodInfo>();
+			// check argument
+			Debug.Assert(type != null);
+
+			// return list of methods exposed outside of the assembly
+			// Note that the list contains special methods for Properties, Events and Operators.
+			// ex. get_*, set_*, add_*, remove_* and op_*
+			return type.GetMethods(defaultBindingFlags)
+					   .Where(IsExposedMethod)
+					   .OrderBy(m => m.Name, StringComparer.Ordinal)
+					   .ThenBy(m => m.GetParameters(), ParameterArrayComparer.Instance)
+					   .ToArray();
+		}
+
+		private static bool IsExposedMethod(MethodInfo method) {
+			// check argument
+			Debug.Assert(method != null);
+
+			return IsExposedMethodBase(method);
 		}
 
 		public EventInfo[] GetEvents(Type type) {
+			// events are checked by its add/remove methods.
 			return Array.Empty<EventInfo>();
 		}
 

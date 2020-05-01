@@ -15,6 +15,8 @@ namespace Zafu.ReflectionScanning {
 
 		#region IReflectionHandler
 
+		// Provides dummy implementation which does nothing.
+
 		public virtual void OnAssembliesScanning(IReadOnlyCollection<Assembly> assemblies) {
 		}
 
@@ -48,6 +50,46 @@ namespace Zafu.ReflectionScanning {
 		}
 
 		public virtual bool OnField(FieldInfo field) {
+			return false;
+		}
+
+		public virtual void OnPropertiesScanning(IReadOnlyCollection<PropertyInfo> props) {
+		}
+
+		public virtual void OnPropertiesScanned(IReadOnlyCollection<PropertyInfo> props, bool canceled, Exception error) {
+		}
+
+		public virtual bool OnProperty(PropertyInfo prop) {
+			return false;
+		}
+
+		public virtual void OnConstructorsScanning(IReadOnlyCollection<ConstructorInfo> ctors) {
+		}
+
+		public virtual void OnConstructorsScanned(IReadOnlyCollection<ConstructorInfo> ctors, bool canceled, Exception error) {
+		}
+
+		public virtual bool OnConstructor(ConstructorInfo ctor) {
+			return false;
+		}
+
+		public virtual void OnMethodsScanning(IReadOnlyCollection<MethodInfo> methods) {
+		}
+
+		public virtual void OnMethodsScanned(IReadOnlyCollection<MethodInfo> methods, bool canceled, Exception error) {
+		}
+
+		public virtual bool OnMethod(MethodInfo method) {
+			return false;
+		}
+
+		public virtual void OnEventsScanning(IReadOnlyCollection<EventInfo> events) {
+		}
+
+		public virtual void OnEventsScanned(IReadOnlyCollection<EventInfo> events, bool canceled, Exception error) {
+		}
+
+		public virtual bool OnEvent(EventInfo evt) {
 			return false;
 		}
 
