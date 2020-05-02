@@ -14,7 +14,7 @@ namespace DotNetAPIScanner.Scanner {
 			};
 			IReflectionFilter filter = Filter.Instance;
 
-			using (Reporter reporter = new ReporterInIndentedText(Console.Out, disposeWriterOnDispose: false)) {
+			using (Reporter reporter = new ReporterInJson(Console.Out, disposeWriterOnDispose: false)) {
 				Scan(filter, reporter, assemblies);
 			}
 		}
