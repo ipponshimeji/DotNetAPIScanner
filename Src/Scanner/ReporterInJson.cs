@@ -27,6 +27,8 @@ namespace DotNetAPIScanner.Scanner {
 
 			public const string Type = "type";
 
+			public const string Types = "types";
+
 			public const string Version = "version";
 
 			#endregion
@@ -53,6 +55,17 @@ namespace DotNetAPIScanner.Scanner {
 
 			#endregion
 		}
+
+		public static class Misc {
+			#region constants
+
+			public const string ConstructorName = ".ctor";
+
+//			public const string StaticConstructorName = ".cctor";
+
+			#endregion
+		}
+
 
 		protected abstract class Scope: IDisposable {
 			#region data
@@ -496,13 +509,13 @@ namespace DotNetAPIScanner.Scanner {
 			// start object
 			OpenObject();
 			WriteItem(Names.Framework, RuntimeInformation.FrameworkDescription);
-			OpenObject(Names.Assemblies);
+			OpenArray(Names.Assemblies);
 		}
 
 		public override void OnAssembliesScanned(IReadOnlyCollection<Assembly> assemblies, bool canceled, Exception error) {
 			// end object
-			CloseObject();
-			CloseObject();
+			CloseArray();	// assemblies
+			CloseObject();	// (root)
 		}
 
 		public override void OnAssemblyScanning(Assembly assembly) {
@@ -511,10 +524,13 @@ namespace DotNetAPIScanner.Scanner {
 				throw new ArgumentNullException(nameof(assembly));
 			}
 
-			OpenObject(assembly.FullName);
+			OpenObject();
+			WriteItem(Names.Name, assembly.FullName);
+			OpenArray(Names.Types);
 		}
 
 		public override bool OnAssemblyScanned(Assembly assembly, Exception error) {
+			CloseArray();	// types
 			CloseObject();
 
 			return false;	// do not request to cancel
@@ -526,12 +542,13 @@ namespace DotNetAPIScanner.Scanner {
 				throw new ArgumentNullException(nameof(type));
 			}
 
-			OpenObject(type.FullName);
+			OpenObject();
+			WriteItem(Names.Name, type.FullName);
 			OpenArray(Names.Members);
 		}
 
 		public override bool OnTypeScanned(Type type, Exception error) {
-			CloseArray();
+			CloseArray();	// members
 			CloseObject();
 
 			return false;   // do not request to cancel
@@ -565,7 +582,6 @@ namespace DotNetAPIScanner.Scanner {
 			// write field information
 			OpenObject();
 			try {
-				WriteItem(Names.Kind, Kinds.Constructor);
 				WriteConstructorInfo(ctor);
 			} finally {
 				CloseObject();
@@ -597,6 +613,10 @@ namespace DotNetAPIScanner.Scanner {
 			// check argument
 			Debug.Assert(ctor != null);
 
+			WriteItem(Names.Kind, Kinds.Constructor);
+			// Note that static constructor does not appear here because it is not a public interface.
+			Debug.Assert(ctor.IsStatic == false);
+			WriteItem(Names.Name, Misc.ConstructorName);
 			WriteMethodBaseInfo(ctor);
 		}
 
@@ -609,7 +629,6 @@ namespace DotNetAPIScanner.Scanner {
 			// write method information
 			OpenObject();
 			try {
-				WriteItem(Names.Kind, Kinds.Method);
 				WriteMethodInfo(method);
 			} finally {
 				CloseObject();
@@ -622,9 +641,10 @@ namespace DotNetAPIScanner.Scanner {
 			// check argument
 			Debug.Assert(method != null);
 
-			WriteMethodBaseInfo(method);
+			WriteItem(Names.Kind, Kinds.Method);
 			WriteItem(Names.Name, method.Name);
 			WriteItem(Names.Type, Util.GetTypeDisplayName(method.ReturnType));
+			WriteMethodBaseInfo(method);
 		}
 
 		#endregion
