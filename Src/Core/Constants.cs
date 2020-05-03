@@ -54,12 +54,24 @@ namespace DotNetAPIScanner {
 			#endregion
 		}
 
+		public static class Points {
+			#region constants
+
+			public const string Existence = "existence";
+
+			#endregion
+		}
+
 		public static class Misc {
 			#region constants
 
 			public const string ConstructorName = ".ctor";
 
 //			public const string StaticConstructorName = ".cctor";
+
+			public const string Problem = "PROBLEM";
+
+			public const string Information = "INFO";
 
 			#endregion
 		}
