@@ -4,68 +4,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using static DotNetAPIScanner.Constants;
 
 
 namespace DotNetAPIScanner.Scanner {
 	public class ReporterInJson: ReporterInText {
 		#region types
-
-		public static class Names {
-			#region constants
-
-			public const string Assemblies = "assemblies";
-
-			public const string Framework = "framework";
-
-			public const string Kind = "kind";
-
-			public const string Members = "members";
-
-			public const string Name = "name";
-
-			public const string Parameters = "parameters";
-
-			public const string Type = "type";
-
-			public const string Types = "types";
-
-			public const string Version = "version";
-
-			#endregion
-		}
-
-		public static class Kinds {
-			#region constants
-
-			public const string Class = "class";
-
-			public const string Constructor = "constructor";
-
-			public const string Delegate = "delegate";
-
-			public const string Enum = "enum";
-
-			public const string Field = "field";
-
-			public const string Interface = "interface";
-
-			public const string Method = "method";
-
-			public const string Struct = "struct";
-
-			#endregion
-		}
-
-		public static class Misc {
-			#region constants
-
-			public const string ConstructorName = ".ctor";
-
-//			public const string StaticConstructorName = ".cctor";
-
-			#endregion
-		}
-
 
 		protected abstract class Scope: IDisposable {
 			#region data
@@ -508,8 +452,8 @@ namespace DotNetAPIScanner.Scanner {
 		public override void OnAssembliesScanning(IReadOnlyCollection<Assembly> assemblies) {
 			// start object
 			OpenObject();
-			WriteItem(Names.Framework, RuntimeInformation.FrameworkDescription);
-			OpenArray(Names.Assemblies);
+			WriteItem(PropNames.Framework, RuntimeInformation.FrameworkDescription);
+			OpenArray(PropNames.Assemblies);
 		}
 
 		public override void OnAssembliesScanned(IReadOnlyCollection<Assembly> assemblies, bool canceled, Exception error) {
@@ -525,8 +469,8 @@ namespace DotNetAPIScanner.Scanner {
 			}
 
 			OpenObject();
-			WriteItem(Names.Name, assembly.FullName);
-			OpenArray(Names.Types);
+			WriteItem(PropNames.Name, assembly.FullName);
+			OpenArray(PropNames.Types);
 		}
 
 		public override bool OnAssemblyScanned(Assembly assembly, Exception error) {
@@ -543,8 +487,8 @@ namespace DotNetAPIScanner.Scanner {
 			}
 
 			OpenObject();
-			WriteItem(Names.Name, type.FullName);
-			OpenArray(Names.Members);
+			WriteItem(PropNames.Name, type.FullName);
+			OpenArray(PropNames.Members);
 		}
 
 		public override bool OnTypeScanned(Type type, Exception error) {
@@ -563,9 +507,9 @@ namespace DotNetAPIScanner.Scanner {
 			// write field information
 			OpenObject();
 			try {
-				WriteItem(Names.Kind, Kinds.Field);
-				WriteItem(Names.Name, field.Name);
-				WriteItem(Names.Type, Util.GetTypeDisplayName(field.FieldType));
+				WriteItem(PropNames.Kind, Kinds.Field);
+				WriteItem(PropNames.Name, field.Name);
+				WriteItem(PropNames.Type, Util.GetTypeDisplayName(field.FieldType));
 			} finally {
 				CloseObject();
 			}
@@ -594,12 +538,12 @@ namespace DotNetAPIScanner.Scanner {
 			// check argument
 			Debug.Assert(method != null);
 
-			OpenArray(Names.Parameters);
+			OpenArray(PropNames.Parameters);
 			try {
 				foreach (ParameterInfo p in method.GetParameters()) {
 					OpenObject();
 					try {
-						WriteItem(Names.Type, Util.GetTypeDisplayName(p.ParameterType));
+						WriteItem(PropNames.Type, Util.GetTypeDisplayName(p.ParameterType));
 					} finally {
 						CloseObject();
 					}
@@ -613,10 +557,10 @@ namespace DotNetAPIScanner.Scanner {
 			// check argument
 			Debug.Assert(ctor != null);
 
-			WriteItem(Names.Kind, Kinds.Constructor);
+			WriteItem(PropNames.Kind, Kinds.Constructor);
 			// Note that static constructor does not appear here because it is not a public interface.
 			Debug.Assert(ctor.IsStatic == false);
-			WriteItem(Names.Name, Misc.ConstructorName);
+			WriteItem(PropNames.Name, Misc.ConstructorName);
 			WriteMethodBaseInfo(ctor);
 		}
 
@@ -641,9 +585,9 @@ namespace DotNetAPIScanner.Scanner {
 			// check argument
 			Debug.Assert(method != null);
 
-			WriteItem(Names.Kind, Kinds.Method);
-			WriteItem(Names.Name, method.Name);
-			WriteItem(Names.Type, Util.GetTypeDisplayName(method.ReturnType));
+			WriteItem(PropNames.Kind, Kinds.Method);
+			WriteItem(PropNames.Name, method.Name);
+			WriteItem(PropNames.Type, Util.GetTypeDisplayName(method.ReturnType));
 			WriteMethodBaseInfo(method);
 		}
 

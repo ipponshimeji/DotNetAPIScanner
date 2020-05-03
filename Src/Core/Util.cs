@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Text;
 
 
-namespace DotNetAPIScanner.Scanner {
+namespace DotNetAPIScanner {
 	public static class Util {
 		#region methods
 
