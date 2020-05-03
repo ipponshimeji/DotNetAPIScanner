@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{7D1F45CB-BB52-4C8D-9D28-73DF930068DC}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>DotNetAPIScanner.Scanner</RootNamespace>
-    <AssemblyName>DotNetAPIScanner.Scanner</AssemblyName>
+    <RootNamespace>DotNetAPIScanner</RootNamespace>
+    <AssemblyName>DotNetAPIScanner</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

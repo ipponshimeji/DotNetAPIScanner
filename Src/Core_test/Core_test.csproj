@@ -5,9 +5,9 @@
 
     <IsPackable>false</IsPackable>
 
-    <AssemblyName>DotNetAPIScanner.Scanner.Test</AssemblyName>
+    <AssemblyName>DotNetAPIScanner.Test</AssemblyName>
 
-    <RootNamespace>DotNetAPIScanner.Scanner</RootNamespace>
+    <RootNamespace>DotNetAPIScanner</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Scanner\Scanner.csproj" />
+    <ProjectReference Include="..\Core\Core.csproj" />
   </ItemGroup>
 
 </Project>
