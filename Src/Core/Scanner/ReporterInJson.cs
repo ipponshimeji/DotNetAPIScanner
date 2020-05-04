@@ -587,7 +587,8 @@ namespace DotNetAPIScanner.Scanner {
 
 			WriteItem(PropNames.Kind, Kinds.Method);
 			WriteItem(PropNames.Name, method.Name);
-			WriteItem(PropNames.Type, Util.GetTypeDisplayName(method.ReturnType));
+			WriteItem(PropNames.TypeParameterCount, method.GetGenericArguments().Length);
+			WriteItem(PropNames.ReturnType, Util.GetTypeDisplayName(method.ReturnType));
 			WriteMethodBaseInfo(method);
 		}
 

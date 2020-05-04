@@ -13,6 +13,12 @@ namespace DotNetAPIScanner.Checker {
 	public class Checker {
 		#region types
 
+		/// <summary>
+		/// The struct to capsule JSON object (Dictionary<string, object>).
+		/// The name is 'SourceObject' because JSON object is used to describe
+		/// information in the source environment in Checker context.
+		/// It caches Name property because the name is used commonly.
+		/// </summary>
 		protected struct SourceObject {
 			#region data
 
@@ -55,6 +61,7 @@ namespace DotNetAPIScanner.Checker {
 			public SourceObject(object jsonObj, string name) : this(jsonObj as IReadOnlyDictionary<string, object>, name) {
 			}
 
+			// Note that a KeyNotFoundException is thrown if jsonObj does not have 'name' property.
 			public SourceObject(IReadOnlyDictionary<string, object> jsonObj) : this(jsonObj, Checker.GetIndispensableValue<string>(jsonObj, PropNames.Name)) {
 			}
 
@@ -68,7 +75,7 @@ namespace DotNetAPIScanner.Checker {
 			#region methods
 
 			public static ArgumentException CreateNotValidException(string paramName) {
-				throw new ArgumentException("It does not have valid contents.", paramName);
+				return new ArgumentException("It does not have valid JSON object.", paramName);
 			}
 
 			public static IEnumerable<SourceObject> ConvertToSourceObjectArray(IReadOnlyList<object> jsonArray, bool sort, bool withoutName) {
@@ -83,6 +90,7 @@ namespace DotNetAPIScanner.Checker {
 					// give explicit null name at creating SourceObject
 					select = (item => new SourceObject(item, null));
 				} else {
+					// item's name is get from its 'name' property
 					select = (item => new SourceObject(item));
 				}
 
@@ -134,7 +142,7 @@ namespace DotNetAPIScanner.Checker {
 
 		#region constants
 
-		protected const BindingFlags DefaultBindingFlags = (
+		protected const BindingFlags TargetBindingFlags = (
 			BindingFlags.DeclaredOnly
 			| BindingFlags.Public
 			| BindingFlags.NonPublic
@@ -151,6 +159,11 @@ namespace DotNetAPIScanner.Checker {
 
 
 		private bool sort = true;
+
+		#endregion
+
+
+		#region data - checking state
 
 		protected int ProblemCount { get; private set; } = 0;
 
@@ -170,7 +183,11 @@ namespace DotNetAPIScanner.Checker {
 
 		protected SourceObject SourceMember { get; private set; } = SourceObject.Null;
 
-		protected IReadOnlyCollection<SourceObject> SourceParameters { get; private set; } = null;
+		protected string SourceMemberKind { get; private set; } = null;
+
+		protected int TypeParameterCount { get; private set; } = -1;
+
+		protected IReadOnlyList<SourceObject> SourceParameters { get; private set; } = null;
 
 		#endregion
 
@@ -183,11 +200,13 @@ namespace DotNetAPIScanner.Checker {
 			}
 			set {
 				// check state
+				// This property cannot be changed when the object is checking.
 				EnsureNotBusy(propSetter: true);
 
 				this.sort = value;
 			}
 		}
+
 
 		protected bool Busy {
 			get {
@@ -203,7 +222,7 @@ namespace DotNetAPIScanner.Checker {
 					// cache the value
 					Type targetType = this.TargetType;
 					if (targetType != null) {
-						value = targetType.GetConstructors(DefaultBindingFlags);
+						value = targetType.GetConstructors(TargetBindingFlags);
 						if (value == null) {
 							// not to call GetConstructors() again
 							value = Array.Empty<ConstructorInfo>();
@@ -224,7 +243,7 @@ namespace DotNetAPIScanner.Checker {
 					// cache the value
 					Type targetType = this.TargetType;
 					if (targetType != null) {
-						value = targetType.GetMethods(DefaultBindingFlags);
+						value = targetType.GetMethods(TargetBindingFlags);
 						if (value == null) {
 							// not to call GetMethods() again
 							value = Array.Empty<MethodInfo>();
@@ -268,7 +287,7 @@ namespace DotNetAPIScanner.Checker {
 			Debug.Assert(this.SourceInfo.Valid == false);
 
 			// check the given source info
-			this.SourceInfo = new SourceObject(sourceInfo, null);
+			this.SourceInfo = new SourceObject(sourceInfo, name: null);
 			this.ProblemCount = 0;
 			try {
 				CheckAssemblies(this.SourceInfo);
@@ -276,13 +295,17 @@ namespace DotNetAPIScanner.Checker {
 				this.SourceInfo = SourceObject.Null;
 			}
 
-			return (this.ProblemCount == 0) ? 0 : 1;
+			return this.ProblemCount;
 		}
 
+		#endregion
+
+
+		#region methods - for derived classes
 
 		protected void EnsureNotBusy(bool propSetter) {
 			if (this.Busy) {
-				string message = propSetter ? "This property cannot be changed when the object is working.": "The object is working.";
+				string message = propSetter ? "This property cannot be changed when the checker is checking.": "The checker is checking.";
 				throw new InvalidOperationException(message);
 			}
 		}
@@ -305,28 +328,47 @@ namespace DotNetAPIScanner.Checker {
 			return (T)orgValue;
 		}
 
-		protected string GetMemberName() {
-			if (this.SourceParameters == null) {
-				// return name simply
-				return this.SourceMember.Name;
+		protected static bool IsConversionOperator(string name) {
+			return NameComparer.Equals(name, Misc.ExplicitOperatorName) || NameComparer.Equals(name, Misc.ImplicitOperatorName);
+		}
+
+		protected string GetOverload() {
+			// check state
+			IReadOnlyList<SourceObject> sourceParams = this.SourceParameters;
+			if (sourceParams == null) {
+				return null;
+			}
+
+			// check state
+			Debug.Assert(this.SourceMember.Valid);
+
+			// list up types which define the overload
+			string name = this.SourceMember.Name;
+			if (NameComparer.Equals(name, Misc.ExplicitOperatorName) || NameComparer.Equals(name, Misc.ImplicitOperatorName)) {
+				// op_Explicit or op_Implicit
+				// they are overloaded by return type
+				return this.SourceMember.GetIndispensableProperty<string>(PropNames.ReturnType);
 			} else {
-				// qualify with parameters
-				StringBuilder buf = new StringBuilder();
-
-				buf.Append(this.SourceMember.Name);
-				buf.Append("(");
-				bool first = true;
-				foreach (SourceObject param in this.SourceParameters) {
-					if (first) {
-						first = false;
-					} else {
-						buf.Append(",");
-					}
-					buf.Append(param.GetIndispensableProperty<string>(PropNames.Type));
+				// other methods are overloaded by parameter types
+				// The case of 0 or 1 parameter is handled separetely for efficiency
+				switch (sourceParams.Count) {
+					case 0:
+						return null;
+					case 1:
+						return sourceParams[0].GetIndispensableProperty<string>(PropNames.Type);
+					default:
+						StringBuilder buf = new StringBuilder();
+						bool first = true;
+						foreach (SourceObject param in sourceParams) {
+							if (first) {
+								first = false;
+							} else {
+								buf.Append(",");
+							}
+							buf.Append(param.GetIndispensableProperty<string>(PropNames.Type));
+						}
+						return buf.ToString();
 				}
-				buf.Append(")");
-
-				return buf.ToString();
 			}
 		}
 
@@ -335,7 +377,10 @@ namespace DotNetAPIScanner.Checker {
 				isProblem,
 				this.SourceAssembly.Name,
 				this.SourceType.Name,
-				GetMemberName(),
+				this.SourceMember.Name,
+				this.SourceMemberKind,
+				this.TypeParameterCount,
+				GetOverload(),
 				point,
 				inSource,
 				inTarget,
@@ -359,7 +404,7 @@ namespace DotNetAPIScanner.Checker {
 			}
 
 			// check each assembly
-			IEnumerable<SourceObject> sourceAssemblies = sourceInfo.GetChildSourceObjects(PropNames.Assemblies, this.Sort);
+			IEnumerable<SourceObject> sourceAssemblies = sourceInfo.GetChildSourceObjects(PropNames.Assemblies, sort: this.Sort);
 			if (sourceAssemblies != null) {
 				foreach (SourceObject sourceAssembly in sourceAssemblies) {
 					this.SourceAssembly = sourceAssembly;
@@ -390,7 +435,7 @@ namespace DotNetAPIScanner.Checker {
 			CheckAssembly(sourceAssembly, targetAssembly);
 
 			// check each type in the assembly
-			IEnumerable<SourceObject> sourceTypes = sourceAssembly.GetChildSourceObjects(PropNames.Types, this.Sort);
+			IEnumerable<SourceObject> sourceTypes = sourceAssembly.GetChildSourceObjects(PropNames.Types, sort: this.Sort);
 			if (sourceTypes != null) {
 				this.TargetAssembly = targetAssembly;
 				try {
@@ -456,7 +501,12 @@ namespace DotNetAPIScanner.Checker {
 
 			// check depending on kind of the member
 			string kind = sourceMember.GetIndispensableProperty<string>(PropNames.Kind);
-			CheckMember(sourceMember, kind);
+			this.SourceMemberKind = kind;
+			try {
+				CheckMember(sourceMember, kind);
+			} finally {
+				this.SourceMemberKind = null;
+			}
 		}
 
 		protected void CheckField(SourceObject sourceField) {
@@ -487,25 +537,28 @@ namespace DotNetAPIScanner.Checker {
 			return (parameters == null) ? Array.Empty<SourceObject>() : parameters.ToArray();
 		}
 
-		protected (T, ParameterInfo[]) GetTargetMethod<T>(IEnumerable<T> overloadedMethods, SourceObject sourceMethod, SourceObject[] sourceParams) where T : MethodBase {
+		// Note that this method returns the first matched method.
+		// You must narrowed candidate enough before you call this method. 
+		protected (T, ParameterInfo[]) SelectTargetMethodByParameterTypes<T>(SourceObject sourceMethod, SourceObject[] sourceParams, IEnumerable<T> candidateMethods) where T : MethodBase {
 			// check argument
-			if (overloadedMethods == null) {
-				throw new ArgumentNullException(nameof(overloadedMethods));
-			}
 			if (sourceMethod.Valid == false) {
 				throw SourceObject.CreateNotValidException(nameof(sourceMethod));
 			}
 			if (sourceParams == null) {
 				throw new ArgumentNullException(nameof(sourceParams));
 			}
+			if (candidateMethods == null) {
+				throw new ArgumentNullException(nameof(candidateMethods));
+			}
 
 			// select methods which have the same parameter count to one of the source method.
 			int paramCount = sourceParams.Length;
-			IEnumerable<(T, ParameterInfo[])> filteredMethod = overloadedMethods.Select(m => (m, m.GetParameters()))
-																				.Where(item => (item.Item2.Length == paramCount));
+			IEnumerable<(T, ParameterInfo[])> filteredMethod = candidateMethods.Select(m => (m, m.GetParameters()))
+																			   .Where(item => (item.Item2.Length == paramCount));
 
-			// check parameter types
-			bool checkParameters(ParameterInfo[] target) {
+			// examine parameter types
+			// Note that this code returns the first matched method.
+			bool examineParameters(ParameterInfo[] target) {
 				for (int i = 0; i < sourceParams.Length; ++i) {
 					if (CheckTypeRef(sourceParams[i], PropNames.Type, target[i].ParameterType, report: false) == false) {
 						return false;
@@ -516,7 +569,7 @@ namespace DotNetAPIScanner.Checker {
 
 			(T, ParameterInfo[]) targetMethod = (null, null);
 			foreach ((T methodInfo, ParameterInfo[] parameters) method in filteredMethod) {
-				if (checkParameters(method.parameters)) {
+				if (examineParameters(method.parameters)) {
 					// parameters matches
 					targetMethod = method;
 					break;
@@ -524,6 +577,40 @@ namespace DotNetAPIScanner.Checker {
 			}
 
 			return targetMethod;
+		}
+
+		protected (ConstructorInfo, ParameterInfo[]) SelectTargetConstructor(SourceObject sourceCtor, SourceObject[] sourceParams, IEnumerable<ConstructorInfo> candidateMethods) {
+			return SelectTargetMethodByParameterTypes<ConstructorInfo>(sourceCtor, sourceParams, candidateMethods);
+		}
+
+		protected (MethodInfo, ParameterInfo[]) SelectTargetMethod(SourceObject sourceMethod, int typeParamCount, SourceObject[] sourceParams, IEnumerable<MethodInfo> candidateMethods) {
+			// check argument
+			if (sourceMethod.Valid == false) {
+				throw SourceObject.CreateNotValidException(nameof(sourceMethod));
+			}
+			if (TypeParameterCount < 0) {
+				throw new ArgumentOutOfRangeException(nameof(TypeParameterCount));
+			}
+			if (sourceParams == null) {
+				throw new ArgumentNullException(nameof(sourceParams));
+			}
+			if (candidateMethods == null) {
+				throw new ArgumentNullException(nameof(candidateMethods));
+			}
+
+			// filter candidate methods
+			// filter by type parameter count and name
+			bool basicFilter(MethodInfo m) {
+				return m.GetGenericArguments().Length == typeParamCount && NameComparer.Equals(sourceMethod.Name, m.Name);
+			}
+			candidateMethods = candidateMethods.Where(basicFilter);
+			if (IsConversionOperator(sourceMethod.Name)) {
+				// op_Explicit or op_Implicit
+				// they are overloaded by its return type
+				candidateMethods = candidateMethods.Where(m => CheckTypeRef(sourceMethod, PropNames.ReturnType, m.ReturnType, report: false));
+			}
+
+			return SelectTargetMethodByParameterTypes<MethodInfo>(sourceMethod, sourceParams, candidateMethods);
 		}
 
 		protected void CheckConstructor(SourceObject sourceCtor) {
@@ -564,11 +651,14 @@ namespace DotNetAPIScanner.Checker {
 			}
 
 			// get source parameters
+			int typeParamCount = (int)sourceMethod.GetIndispensableProperty<double>(PropNames.TypeParameterCount);
 			SourceObject[] sourceParams = GetSourceParameters(sourceMethod);
+
+			this.TypeParameterCount = typeParamCount;
 			this.SourceParameters = sourceParams;
 			try {
 				// check existence
-				(MethodInfo targetMethod, ParameterInfo[] targetParams) = GetTargetMethod(sourceMethod, sourceParams);
+				(MethodInfo targetMethod, ParameterInfo[] targetParams) = GetTargetMethod(sourceMethod, typeParamCount, sourceParams);
 				if (targetMethod == null) {
 					// target method not found
 					OnReport(CreateExistenceReport());
@@ -585,6 +675,7 @@ namespace DotNetAPIScanner.Checker {
 				}
 			} finally {
 				this.SourceParameters = null;
+				this.TypeParameterCount = -1;
 			}
 		}
 
@@ -698,7 +789,7 @@ namespace DotNetAPIScanner.Checker {
 			Debug.Assert(this.TargetAssembly != null);
 
 			// try to get target field
-			return this.TargetType.GetField(sourceField.Name, DefaultBindingFlags);
+			return this.TargetType.GetField(sourceField.Name, TargetBindingFlags);
 		}
 
 		protected virtual void CheckField(SourceObject sourceField, FieldInfo targetField) {
@@ -715,7 +806,7 @@ namespace DotNetAPIScanner.Checker {
 		}
 
 		protected virtual (ConstructorInfo, ParameterInfo[]) GetTargetConstructor(SourceObject sourceCtor, SourceObject[] sourceParams) {
-			return GetTargetMethod<ConstructorInfo>(this.TargetTypeConstructors, sourceCtor, sourceParams);
+			return SelectTargetConstructor(sourceCtor, sourceParams, this.TargetTypeConstructors);
 		}
 
 		protected virtual void CheckConstructor(SourceObject sourceCtor, ConstructorInfo targetCtor) {
@@ -730,9 +821,8 @@ namespace DotNetAPIScanner.Checker {
 			// any checks?
 		}
 
-		protected virtual (MethodInfo, ParameterInfo[]) GetTargetMethod(SourceObject sourceMethod, SourceObject[] sourceParams) {
-			IEnumerable<MethodInfo> overloadedMethods = this.TargetTypeMethods.Where(m => NameComparer.Equals(sourceMethod.Name, m.Name));
-			return GetTargetMethod<MethodInfo>(overloadedMethods, sourceMethod, sourceParams);
+		protected virtual (MethodInfo, ParameterInfo[]) GetTargetMethod(SourceObject sourceMethod, int typeParamCount, SourceObject[] sourceParams) {
+			return SelectTargetMethod(sourceMethod, typeParamCount, sourceParams, this.TargetTypeMethods);
 		}
 
 		protected virtual void CheckMethod(SourceObject sourceMethod, MethodInfo targetMethod) {
@@ -745,7 +835,7 @@ namespace DotNetAPIScanner.Checker {
 			}
 
 			// check return type
-			CheckTypeRef(sourceMethod, PropNames.Type, targetMethod.ReturnType, point: "return type");
+			CheckTypeRef(sourceMethod, PropNames.ReturnType, targetMethod.ReturnType, point: "return type");
 		}
 
 		protected virtual void CheckParameter(SourceObject sourceParam, ParameterInfo targetParam, int index) {

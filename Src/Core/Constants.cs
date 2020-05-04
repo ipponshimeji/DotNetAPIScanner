@@ -23,7 +23,11 @@ namespace DotNetAPIScanner {
 
 			public const string Parameters = "parameters";
 
+			public const string ReturnType = "returntype";
+
 			public const string Type = "type";
+
+			public const string TypeParameterCount = "typeparametercount";
 
 			public const string Types = "types";
 
@@ -70,6 +74,11 @@ namespace DotNetAPIScanner {
 			public const string ConstructorName = ".ctor";
 
 //			public const string StaticConstructorName = ".cctor";
+
+			public const string ExplicitOperatorName = "op_Explicit";
+
+			public const string ImplicitOperatorName = "op_implicit";
+
 
 			public const string Problem = "PROBLEM";
 

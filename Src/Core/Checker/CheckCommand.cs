@@ -83,7 +83,7 @@ namespace DotNetAPIScanner.Checker {
 			}
 
 			// write the report to the output
-			e.Report.WriteTo(writer, quote: true, appendNewLine: true);
+			e.Report.WriteTo(writer, appendNewLine: true);
 		}
 
 		#endregion
