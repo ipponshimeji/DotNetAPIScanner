@@ -59,6 +59,8 @@ namespace DotNetAPIScanner {
 
 			public const string Existence = "existence";
 
+			public const string Type = "type";
+
 			#endregion
 		}
 

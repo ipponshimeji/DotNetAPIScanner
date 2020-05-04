@@ -55,7 +55,8 @@ namespace DotNetAPIScanner.Checker {
 			}
 
 			// check the source
-			Checker checker = new Checker(source, sort);
+			Checker checker = new Checker();
+			checker.Sort = sort;
 			checker.Report += checker_Report;
 			try {
 				// write header line to output
@@ -63,7 +64,7 @@ namespace DotNetAPIScanner.Checker {
 				writer.WriteLine(CheckReport.GetHeaderLine());
 
 				// check
-				return checker.Check();
+				return checker.Check(source);
 			} finally {
 				checker.Report -= checker_Report;
 			}
