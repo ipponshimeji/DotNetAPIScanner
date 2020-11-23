@@ -2,17 +2,17 @@
 using System.Diagnostics;
 
 namespace DotNetAPIScanner.Comparing {
-	public class CheckEventArgs: EventArgs {
+	public class CompareEventArgs: EventArgs {
 		#region data
 
-		public  CheckReport Report { get; private set; }
+		public  ComparingReport Report { get; private set; }
 
 		#endregion
 
 
 		#region initialization & disposal
 
-		public CheckEventArgs(CheckReport report) {
+		public CompareEventArgs(ComparingReport report) {
 			// check argument
 			if (report == null) {
 				throw new ArgumentNullException(nameof(report));

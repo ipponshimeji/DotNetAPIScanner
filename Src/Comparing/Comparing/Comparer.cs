@@ -9,7 +9,7 @@ using System.Text;
 using static DotNetAPIScanner.Constants;
 
 namespace DotNetAPIScanner.Comparing {
-	public class Checker {
+	public class Comparer {
 		#region types
 
 		/// <summary>
@@ -61,7 +61,7 @@ namespace DotNetAPIScanner.Comparing {
 			}
 
 			// Note that a KeyNotFoundException is thrown if jsonObj does not have 'name' property.
-			public SourceObject(IReadOnlyDictionary<string, object> jsonObj) : this(jsonObj, Checker.GetIndispensableValue<string>(jsonObj, PropNames.Name)) {
+			public SourceObject(IReadOnlyDictionary<string, object> jsonObj) : this(jsonObj, Comparer.GetIndispensableValue<string>(jsonObj, PropNames.Name)) {
 			}
 
 			// Note that an ArgumentNullException is thrown if jsonObj is not a IReadOnlyDictionary<string, object>.
@@ -108,7 +108,7 @@ namespace DotNetAPIScanner.Comparing {
 					throw new InvalidOperationException();
 				}
 
-				return Checker.GetIndispensableValue<T>(this.Object, propName);
+				return Comparer.GetIndispensableValue<T>(this.Object, propName);
 			}
 
 			// Note that it returns null if the target child array is not found or empty.
@@ -260,14 +260,14 @@ namespace DotNetAPIScanner.Comparing {
 
 		#region events
 
-		public event EventHandler<CheckEventArgs> Report = null;
+		public event EventHandler<CompareEventArgs> Report = null;
 
 		#endregion
 
 
 		#region initialization & disposal
 
-		public Checker() {
+		public Comparer() {
 		}
 
 		#endregion
@@ -371,8 +371,8 @@ namespace DotNetAPIScanner.Comparing {
 			}
 		}
 
-		protected CheckReport CreateReport(string point, string inSource, string inTarget, string remark = null, bool isProblem = true) {
-			return new CheckReport(
+		protected ComparingReport CreateReport(string point, string inSource, string inTarget, string remark = null, bool isProblem = true) {
+			return new ComparingReport(
 				isProblem,
 				this.SourceAssembly.Name,
 				this.SourceType.Name,
@@ -387,7 +387,7 @@ namespace DotNetAPIScanner.Comparing {
 			);
 		}
 
-		protected CheckReport CreateExistenceReport(string remark = null) {
+		protected ComparingReport CreateExistenceReport(string remark = null) {
 			return CreateReport(Points.Existence, "exists", "does not exist", remark, true);
 		}
 
@@ -683,16 +683,16 @@ namespace DotNetAPIScanner.Comparing {
 
 		#region overridables
 
-		protected virtual void OnReport(CheckReport report) {
+		protected virtual void OnReport(ComparingReport report) {
 			// check argument
 			if (report == null) {
 				throw new ArgumentNullException(nameof(report));
 			}
 
 			// fire Report event
-			EventHandler<CheckEventArgs> handler = this.Report;
+			EventHandler<CompareEventArgs> handler = this.Report;
 			if (handler != null) {
-				CheckEventArgs e = new CheckEventArgs(report);
+				CompareEventArgs e = new CompareEventArgs(report);
 				try {
 					handler(this, e);
 				} catch {

@@ -42,10 +42,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Comparing\CheckCommand.cs" />
-    <Compile Include="Comparing\Checker.cs" />
-    <Compile Include="Comparing\CheckEventArgs.cs" />
-    <Compile Include="Comparing\CheckReport.cs" />
+    <Compile Include="Comparing\CompareCommand.cs" />
+    <Compile Include="Comparing\Comparer.cs" />
+    <Compile Include="Comparing\CompareEventArgs.cs" />
+    <Compile Include="Comparing\ComparingReport.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

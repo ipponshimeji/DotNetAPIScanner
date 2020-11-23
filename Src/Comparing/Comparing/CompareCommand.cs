@@ -6,7 +6,7 @@ using System.IO;
 using System.Text;
 
 namespace DotNetAPIScanner.Comparing {
-	public abstract class CheckCommand: Command {
+	public abstract class CompareCommand: Command {
 		#region types
 
 		public new class TaskKinds: Command.TaskKinds {
@@ -83,7 +83,7 @@ namespace DotNetAPIScanner.Comparing {
 
 		#region initialization & disposal
 
-		public CheckCommand() : base() {
+		public CompareCommand() : base() {
 		}
 
 		#endregion
@@ -104,13 +104,13 @@ namespace DotNetAPIScanner.Comparing {
 			}
 
 			// check the source
-			Checker checker = new Checker();
+			Comparer checker = new Comparer();
 			checker.Sort = sort;
 			checker.Report += checker_Report;
 			try {
 				// write header line to output
 				writer.Write("# ");
-				writer.WriteLine(CheckReport.GetHeaderLine());
+				writer.WriteLine(ComparingReport.GetHeaderLine());
 
 				// check
 				return checker.Check(source);
@@ -262,14 +262,14 @@ namespace DotNetAPIScanner.Comparing {
 			Debug.Assert(writer != null);
 
 			// setup event handler and check the source information
-			Checker checker = CreateChecker();
+			Comparer checker = CreateChecker();
 			SetupChecker(checker);
 
 			checker.Report += checker_Report;
 			try {
 				// write header line to output
 				writer.Write("# ");
-				writer.WriteLine(CheckReport.GetHeaderLine());
+				writer.WriteLine(ComparingReport.GetHeaderLine());
 
 				// check
 				return checker.Check(sourceInfo);
@@ -278,11 +278,11 @@ namespace DotNetAPIScanner.Comparing {
 			}
 		}
 
-		protected virtual Checker CreateChecker() {
-			return new Checker();
+		protected virtual Comparer CreateChecker() {
+			return new Comparer();
 		}
 
-		protected virtual void SetupChecker(Checker checker) {
+		protected virtual void SetupChecker(Comparer checker) {
 			// check argument
 			if (checker == null) {
 				throw new ArgumentNullException(nameof(checker));
@@ -297,7 +297,7 @@ namespace DotNetAPIScanner.Comparing {
 
 		#region event handlers
 
-		private void checker_Report(object sender, CheckEventArgs e) {
+		private void checker_Report(object sender, CompareEventArgs e) {
 			// check state
 			TextWriter writer = this.Writer;
 			if (writer == null) {

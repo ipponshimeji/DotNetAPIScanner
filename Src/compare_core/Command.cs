@@ -6,7 +6,7 @@ using Utf8Json;
 using DotNetAPIScanner.Comparing;
 
 namespace DotNetAPIScanner.Compare {
-	class Command: CheckCommand {
+	class Command: CompareCommand {
 		#region overrides
 
 		// GetSourceInfo is implemented here because it seems that a .NET Framework app

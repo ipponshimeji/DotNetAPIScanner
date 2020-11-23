@@ -4,7 +4,7 @@ using System.IO;
 using static DotNetAPIScanner.Constants;
 
 namespace DotNetAPIScanner.Comparing {
-	public class CheckReport {
+	public class ComparingReport {
 		#region data
 
 		public readonly bool IsProblem;
@@ -34,7 +34,7 @@ namespace DotNetAPIScanner.Comparing {
 
 		#region initialization & disposal
 
-		public CheckReport(bool isProblem, string assembly, string type, string member, string memberKind, int typeParameterCount, string overload, string point, string inSource, string inTarget, string remark) {
+		public ComparingReport(bool isProblem, string assembly, string type, string member, string memberKind, int typeParameterCount, string overload, string point, string inSource, string inTarget, string remark) {
 			// check argument
 			void normalizeNull(ref string val) {
 				if (val == null) {
