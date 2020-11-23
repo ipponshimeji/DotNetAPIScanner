@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 
-
-namespace Zafu.ReflectionScanning {
+namespace DotNetAPIScanner.ReflectionScanning {
 	public class ReflectionScanner {
 		#region data
 

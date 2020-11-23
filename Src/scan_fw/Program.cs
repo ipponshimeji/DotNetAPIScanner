@@ -1,6 +1,5 @@
 ﻿using System;
-using DotNetAPIScanner.Scanner;
-
+using DotNetAPIScanner.Scanning;
 
 namespace DotNetAPIScanner.Scan {
 	class Program {

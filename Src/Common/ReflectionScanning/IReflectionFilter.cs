@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
 
-
-namespace Zafu.ReflectionScanning {
+namespace DotNetAPIScanner.ReflectionScanning {
 	public interface IReflectionFilter {
 		Type[] GetTypes(Assembly assembly);
 		FieldInfo[] GetFields(Type type);

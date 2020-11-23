@@ -2,8 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 
-
-namespace DotNetAPIScanner.Scanner {
+namespace DotNetAPIScanner.Scanning {
 	public class ReporterInText: Reporter {
 		#region constants
 

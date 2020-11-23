@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-
-namespace Zafu.ReflectionScanning {
+namespace DotNetAPIScanner.ReflectionScanning {
 	public interface IReflectionHandler {
 		void OnAssembliesScanning(IReadOnlyCollection<Assembly> assemblies);
 

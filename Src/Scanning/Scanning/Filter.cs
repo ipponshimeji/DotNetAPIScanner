@@ -2,10 +2,9 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using Zafu.ReflectionScanning;
+using DotNetAPIScanner.ReflectionScanning;
 
-
-namespace DotNetAPIScanner.Scanner {
+namespace DotNetAPIScanner.Scanning {
 	public class Filter: IReflectionFilter {
 		#region data
 

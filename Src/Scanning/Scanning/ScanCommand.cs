@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
-using Zafu.ReflectionScanning;
+using DotNetAPIScanner.ReflectionScanning;
 
-
-namespace DotNetAPIScanner.Scanner {
+namespace DotNetAPIScanner.Scanning {
 	public class ScanCommand {
 		public static void Run(string[] args) {
 			Assembly[] assemblies = new Assembly[] {

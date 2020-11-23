@@ -3,8 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using static DotNetAPIScanner.Constants;
 
-
-namespace DotNetAPIScanner.Checker {
+namespace DotNetAPIScanner.Comparing {
 	public class CheckReport {
 		#region data
 

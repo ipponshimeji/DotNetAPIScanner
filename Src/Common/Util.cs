@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-
 namespace DotNetAPIScanner {
 	public static class Util {
 		#region methods

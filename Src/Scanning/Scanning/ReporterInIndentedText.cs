@@ -4,8 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 
-
-namespace DotNetAPIScanner.Scanner {
+namespace DotNetAPIScanner.Scanning {
 	public class ReporterInIndentedText: ReporterInText {
 		#region initialization & disposal
 

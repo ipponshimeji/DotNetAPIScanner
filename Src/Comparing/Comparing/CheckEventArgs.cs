@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-
-namespace DotNetAPIScanner.Checker {
+namespace DotNetAPIScanner.Comparing {
 	public class CheckEventArgs: EventArgs {
 		#region data
 

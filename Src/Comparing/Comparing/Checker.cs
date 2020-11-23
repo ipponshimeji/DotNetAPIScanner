@@ -8,8 +8,7 @@ using System.Security.Principal;
 using System.Text;
 using static DotNetAPIScanner.Constants;
 
-
-namespace DotNetAPIScanner.Checker {
+namespace DotNetAPIScanner.Comparing {
 	public class Checker {
 		#region types
 

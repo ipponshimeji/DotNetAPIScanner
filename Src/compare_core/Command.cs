@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Utf8Json;
-using DotNetAPIScanner.Checker;
+using DotNetAPIScanner.Comparing;
 
-
-namespace DotNetAPIScanner.Check {
+namespace DotNetAPIScanner.Compare {
 	class Command: CheckCommand {
 		#region overrides
 

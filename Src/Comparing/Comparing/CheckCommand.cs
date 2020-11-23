@@ -5,8 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 
-
-namespace DotNetAPIScanner.Checker {
+namespace DotNetAPIScanner.Comparing {
 	public abstract class CheckCommand: Command {
 		#region types
 

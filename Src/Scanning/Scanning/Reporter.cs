@@ -1,8 +1,7 @@
 ﻿using System;
-using Zafu.ReflectionScanning;
+using DotNetAPIScanner.ReflectionScanning;
 
-
-namespace DotNetAPIScanner.Scanner {
+namespace DotNetAPIScanner.Scanning {
 	public class Reporter: ReflectionHandler, IDisposable {
 		#region initialization & disposal
 

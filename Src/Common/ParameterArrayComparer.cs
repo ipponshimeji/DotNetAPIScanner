@@ -3,14 +3,13 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Reflection;
 
-
 namespace DotNetAPIScanner {
 	public class ParameterArrayComparer: IComparer<ParameterInfo[]> {
 		#region data
 
 		public static readonly ParameterArrayComparer Instance = new ParameterArrayComparer();
 
-		private static readonly ParameterInfo[] Empty = Array.Empty<ParameterInfo>(); 
+		private static readonly ParameterInfo[] Empty = Array.Empty<ParameterInfo>();
 
 		#endregion
 
