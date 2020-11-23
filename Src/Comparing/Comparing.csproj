@@ -4,12 +4,12 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{42EA2BC1-1B6D-45C3-AE6D-00137FE09067}</ProjectGuid>
+    <ProjectGuid>{2A07C57E-712E-4DDF-9543-ED0BD7720748}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Zafu.ReflectionScanning</RootNamespace>
-    <AssemblyName>Zafu.ReflectionScanning</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <RootNamespace>DotNetAPIScanner</RootNamespace>
+    <AssemblyName>DotNetAPIScanner.Comparing</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
@@ -41,11 +41,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ReflectionHandler.cs" />
-    <Compile Include="IReflectionHandler.cs" />
-    <Compile Include="IReflectionFilter.cs" />
+    <Compile Include="Comparing\CheckCommand.cs" />
+    <Compile Include="Comparing\Checker.cs" />
+    <Compile Include="Comparing\CheckEventArgs.cs" />
+    <Compile Include="Comparing\CheckReport.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReflectionScanner.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{309f86d7-753b-4db2-b90d-71a6c99ac4ec}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

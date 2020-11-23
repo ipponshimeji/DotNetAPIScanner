@@ -4,17 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{C52D4741-65CD-434B-ABE8-AAF68A7BE7BB}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>DotNetAPIScanner.Scan</RootNamespace>
-    <AssemblyName>scan</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <ProjectGuid>{309F86D7-753B-4DB2-B90D-71A6C99AC4EC}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DotNetAPIScanner</RootNamespace>
+    <AssemblyName>DotNetAPIScanner.Common</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,7 +23,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -43,17 +41,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="Command\Command.cs" />
+    <Compile Include="Constants.cs" />
+    <Compile Include="ParameterArrayComparer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Scanning\Scanning.csproj">
-      <Project>{c2b8d065-5bac-4e53-8a99-939543ee3b27}</Project>
-      <Name>Scanning</Name>
-    </ProjectReference>
+    <Compile Include="ReflectionScanning\IReflectionFilter.cs" />
+    <Compile Include="ReflectionScanning\IReflectionHandler.cs" />
+    <Compile Include="ReflectionScanning\ReflectionHandler.cs" />
+    <Compile Include="ReflectionScanning\ReflectionScanner.cs" />
+    <Compile Include="Util.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>compare</AssemblyName>
+    <RootNamespace>DotNetAPIScanner.Compare</RootNamespace>
+    <Product>.NET API Scanner</Product>
+    <Copyright>Copyright (c) 2020 Takamasa Uramoto</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Comparing\Comparing.csproj" />
+  </ItemGroup>
+
+</Project>
