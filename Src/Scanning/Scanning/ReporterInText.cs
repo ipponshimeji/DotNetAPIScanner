@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 
 namespace DotNetAPIScanner.Scanning {
 	public class ReporterInText: Reporter {
@@ -17,7 +18,7 @@ namespace DotNetAPIScanner.Scanning {
 
 		#region data
 
-		protected TextWriter Writer { get; private set; }
+		private TextWriter writer;
 
 		private readonly bool disposeWriterOnDispose;
 
@@ -29,6 +30,8 @@ namespace DotNetAPIScanner.Scanning {
 
 
 		#region properties
+
+		protected TextWriter Writer => this.writer;
 
 		public int IndentWidth {
 			get {
@@ -56,14 +59,13 @@ namespace DotNetAPIScanner.Scanning {
 			}
 
 			// initialize member
-			this.Writer = writer;
+			this.writer = writer;
 			this.disposeWriterOnDispose = disposeWriterOnDispose;
 		}
 
 		public override void Dispose() {
 			// dispose this.Writer if necessary
-			TextWriter writer = this.Writer;
-			this.Writer = null;
+			TextWriter writer = Interlocked.Exchange(ref this.writer, null);
 			if (writer != null && this.disposeWriterOnDispose) {
 				writer.Dispose();
 			}

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using static DotNetAPIScanner.Constants;
 
 namespace DotNetAPIScanner.Scanning {
@@ -450,8 +451,7 @@ namespace DotNetAPIScanner.Scanning {
 		public override void OnAssembliesScanning(IReadOnlyCollection<Assembly> assemblies) {
 			// start object
 			OpenObject();
-			// TODO: framework description
-//			WriteItem(PropNames.Framework, RuntimeInformation.FrameworkDescription);
+			WriteItem(PropNames.Framework, RuntimeInformation.FrameworkDescription);
 			OpenArray(PropNames.Assemblies);
 		}
 

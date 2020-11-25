@@ -25,13 +25,7 @@ namespace DotNetAPIScanner.Scanning {
 			Debug.Assert(assemblies != null);
 
 			// scan assemblies
-			ReflectionScanner scanner = new ReflectionScanner(filter);
-			scanner.AddHandler(handler);
-			try {
-				scanner.ScanAssemblies(assemblies);
-			} finally {
-				scanner.RemoveHandler(handler);
-			}
+			new ReflectionScanner(filter).ScanAssemblies(handler, assemblies);
 		}
 	}
 }

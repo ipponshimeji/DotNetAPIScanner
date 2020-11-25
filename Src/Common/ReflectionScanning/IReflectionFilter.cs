@@ -4,11 +4,11 @@ using System.Reflection;
 
 namespace DotNetAPIScanner.ReflectionScanning {
 	public interface IReflectionFilter {
-		Type[] GetTypes(Assembly assembly);
-		FieldInfo[] GetFields(Type type);
-		PropertyInfo[] GetProperties(Type type);
-		ConstructorInfo[] GetConstructors(Type type);
-		MethodInfo[] GetMethods(Type type);
-		EventInfo[] GetEvents(Type type);
+		IEnumerable<Type> GetTypes(Assembly assembly);
+		IEnumerable<FieldInfo> GetFields(Type type);
+		IEnumerable<PropertyInfo> GetProperties(Type type);
+		IEnumerable<ConstructorInfo> GetConstructors(Type type);
+		IEnumerable<MethodInfo> GetMethods(Type type);
+		IEnumerable<EventInfo> GetEvents(Type type);
 	}
 }

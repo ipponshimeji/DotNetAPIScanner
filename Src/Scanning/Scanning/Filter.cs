@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -14,7 +15,7 @@ namespace DotNetAPIScanner.Scanning {
 		private const BindingFlags defaultBindingFlags = (
 			BindingFlags.DeclaredOnly
 			| BindingFlags.Public
-			| BindingFlags.NonPublic
+			| BindingFlags.NonPublic	// we need protected members
 			| BindingFlags.Instance
 			| BindingFlags.Static
 		);
@@ -26,15 +27,14 @@ namespace DotNetAPIScanner.Scanning {
 
 		#region IReflectionFilter
 
-		public Type[] GetTypes(Assembly assembly) {
+		public IEnumerable<Type> GetTypes(Assembly assembly) {
 			// check argument
 			Debug.Assert(assembly != null);
 
 			// return sorted list of exported types and forwarded types
 			return assembly.GetExportedTypes()
 						   .Concat(GetForwardedTypes(assembly))
-						   .OrderBy(t => t.FullName, StringComparer.Ordinal)
-						   .ToArray();
+						   .OrderBy(t => t.FullName, StringComparer.Ordinal);
 		}
 
 		private static Type[] GetForwardedTypes(Assembly assembly) {
@@ -53,15 +53,14 @@ namespace DotNetAPIScanner.Scanning {
 			return getForwardedTypes.Invoke(assembly, Array.Empty<object>()) as Type[];
 		}
 
-		public FieldInfo[] GetFields(Type type) {
+		public IEnumerable<FieldInfo> GetFields(Type type) {
 			// check argument
 			Debug.Assert(type != null);
 
 			// return list of fields exposed outside of the assembly
 			return type.GetFields(defaultBindingFlags)
 					   .Where(IsExposedField)
-					   .OrderBy(f => f.Name, StringComparer.Ordinal)
-					   .ToArray();
+					   .OrderBy(f => f.Name, StringComparer.Ordinal);
 		}
 
 		private static bool IsExposedField(FieldInfo field) {
@@ -79,20 +78,19 @@ namespace DotNetAPIScanner.Scanning {
 			}
 		}
 
-		public PropertyInfo[] GetProperties(Type type) {
+		public IEnumerable<PropertyInfo> GetProperties(Type type) {
 			// properties are checked by its accessor methods.
 			return Array.Empty<PropertyInfo>();
 		}
 
-		public ConstructorInfo[] GetConstructors(Type type) {
+		public IEnumerable<ConstructorInfo> GetConstructors(Type type) {
 			// check argument
 			Debug.Assert(type != null);
 
 			// return list of constructors exposed outside of the assembly
 			return type.GetConstructors(defaultBindingFlags)
 					   .Where(IsExposedConstructor)
-					   .OrderBy(c => c.GetParameters(), ParameterArrayComparer.Instance)
-					   .ToArray();
+					   .OrderBy(c => c.GetParameters(), ParameterArrayComparer.Instance);
 		}
 
 		private static bool IsExposedMethodBase(MethodBase method) {
@@ -117,7 +115,7 @@ namespace DotNetAPIScanner.Scanning {
 			return IsExposedMethodBase(ctor);
 		}
 
-		public MethodInfo[] GetMethods(Type type) {
+		public IEnumerable<MethodInfo> GetMethods(Type type) {
 			// check argument
 			Debug.Assert(type != null);
 
@@ -127,8 +125,7 @@ namespace DotNetAPIScanner.Scanning {
 			return type.GetMethods(defaultBindingFlags)
 					   .Where(IsExposedMethod)
 					   .OrderBy(m => m.Name, StringComparer.Ordinal)
-					   .ThenBy(m => m.GetParameters(), ParameterArrayComparer.Instance)
-					   .ToArray();
+					   .ThenBy(m => m.GetParameters(), ParameterArrayComparer.Instance);
 		}
 
 		private static bool IsExposedMethod(MethodInfo method) {
@@ -138,7 +135,7 @@ namespace DotNetAPIScanner.Scanning {
 			return IsExposedMethodBase(method);
 		}
 
-		public EventInfo[] GetEvents(Type type) {
+		public IEnumerable<EventInfo> GetEvents(Type type) {
 			// events are checked by its add/remove methods.
 			return Array.Empty<EventInfo>();
 		}
