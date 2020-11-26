@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TextOutputCommand.cs" />
     <Compile Include="Command.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="ParameterArrayComparer.cs" />

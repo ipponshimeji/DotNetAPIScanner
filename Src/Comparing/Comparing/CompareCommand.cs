@@ -231,7 +231,7 @@ namespace DotNetAPIScanner.Comparing {
 				if (outputEncoding == null) {
 					return check(Console.Out);
 				} else {
-					Console.Error.Write(outputEncoding);
+					// Console.Error.Write(outputEncoding);
 					using (StreamWriter writer = new StreamWriter(Console.OpenStandardOutput(), outputEncoding)) {
 						return check(writer);
 					}
