@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
 
 namespace DotNetAPIScanner.Comparing {
-	public abstract class CompareCommand: Command {
+	public abstract class CompareCommand: TextOutputCommand {
 		#region types
 
 		public new class TaskKinds: Command.TaskKinds {
 			#region constants
 
-			public const string Check = "check";
+			public const string Compare = "compare";
 
 			#endregion
 		}
@@ -24,11 +23,7 @@ namespace DotNetAPIScanner.Comparing {
 
 		private Encoding inputEncoding = null;
 
-		private Encoding outputEncoding = null;
-
 		private string inputFilePath = null;
-
-		private string outputFilePath = null;
 
 		#endregion
 
@@ -51,30 +46,12 @@ namespace DotNetAPIScanner.Comparing {
 			}
 		}
 
-		public Encoding OutputEncoding {
-			get {
-				return this.outputEncoding;
-			}
-			set {
-				SetCommandArgumentProperty<Encoding>(ref this.outputEncoding, value);
-			}
-		}
-
 		public string InputFilePath {
 			get {
 				return this.inputFilePath;
 			}
 			set {
 				SetCommandArgumentProperty<string>(ref this.inputFilePath, value);
-			}
-		}
-
-		public string OutputFilePath {
-			get {
-				return this.outputFilePath;
-			}
-			set {
-				SetCommandArgumentProperty<string>(ref this.outputFilePath, value);
 			}
 		}
 
@@ -106,16 +83,64 @@ namespace DotNetAPIScanner.Comparing {
 			// check the source
 			Comparer checker = new Comparer();
 			checker.Sort = sort;
-			checker.Report += checker_Report;
+			checker.Report += comparer_Report;
 			try {
 				// write header line to output
 				writer.Write("# ");
 				writer.WriteLine(ComparingReport.GetHeaderLine());
 
 				// check
-				return checker.Check(source);
+				return checker.Compare(source);
 			} finally {
-				checker.Report -= checker_Report;
+				checker.Report -= comparer_Report;
+			}
+		}
+
+		#endregion
+
+
+		#region methods
+
+		public int Compare(TextWriter writer) {
+			// check argument
+			if (writer == null) {
+				throw new ArgumentNullException(nameof(writer));
+			}
+
+			this.Writer = writer;
+			try {
+				// load the input file
+				IReadOnlyDictionary<string, object> sourceInfo = GetSourceInfo(this.InputFilePath, this.InputEncoding);
+				return Compare(sourceInfo);
+			} finally {
+				this.Writer = null;
+			}
+		}
+
+		public int Compare() {
+			return OpenOutputWriterAndExecute(Compare);
+		}
+
+		protected static IReadOnlyDictionary<string, object> OpenInputStreamAndGetSourceInfo(string inputFilePath, Encoding inputEncoding, Func<Stream, Encoding, IReadOnlyDictionary<string, object>> getSourceInfo) {
+			// check argument
+			if (getSourceInfo == null) {
+				throw new ArgumentNullException(nameof(getSourceInfo));
+			}
+
+			if (string.IsNullOrEmpty(inputFilePath)) {
+				// input from the standard input
+				if (inputEncoding == null) {
+					inputEncoding = Console.InputEncoding;
+				}
+				return getSourceInfo(Console.OpenStandardInput(), inputEncoding);
+			} else {
+				// input from a file
+				if (inputEncoding == null) {
+					inputEncoding = Encoding.UTF8;
+				}
+				using (FileStream stream = File.OpenRead(inputFilePath)) {
+					return getSourceInfo(stream, inputEncoding);
+				}
 			}
 		}
 
@@ -133,17 +158,9 @@ namespace DotNetAPIScanner.Comparing {
 				case "--input":
 					this.InputFilePath = GetOptionValue(arg, argEnumerator);
 					break;
-				case "-o":
-				case "--output":
-					this.OutputFilePath = GetOptionValue(arg, argEnumerator);
-					break;
 				case "-ie":
 				case "--input-encoding":
 					this.InputEncoding = Encoding.GetEncoding(GetOptionValue(arg, argEnumerator));
-					break;
-				case "-oe":
-				case "--output-encoding":
-					this.OutputEncoding = Encoding.GetEncoding(GetOptionValue(arg, argEnumerator));
 					break;
 				default:
 					base.HandleOption(arg, argEnumerator);
@@ -158,7 +175,7 @@ namespace DotNetAPIScanner.Comparing {
 			// prepare this class level
 			if (taskKind == null) {
 				// actually no preparation required
-				taskKind = TaskKinds.Check;
+				taskKind = TaskKinds.Compare;
 			}
 
 			return taskKind;
@@ -166,8 +183,8 @@ namespace DotNetAPIScanner.Comparing {
 
 		protected override int Execute(string taskKind) {
 			switch (taskKind) {
-				case TaskKinds.Check:
-					return Check();
+				case TaskKinds.Compare:
+					return Compare();
 				default:
 					return base.Execute(taskKind);
 			}
@@ -179,13 +196,18 @@ namespace DotNetAPIScanner.Comparing {
 				throw new ArgumentNullException(nameof(writer));
 			}
 
-			writer.WriteLine("");
+			// write help message
+			// Write each line using writer.WriteLine to end with appropriate new line char
+			// in the current environment. (that is, do not use here document)
+			//                12345678901234567890123456789012345678901234567890123456789012345678901234567890
+			writer.WriteLine("Compares the information of public interfaces of the .NET Framework assemblies");
+			writer.WriteLine("collected on a .NET environment with ones on the current .NET environment.");
 			writer.WriteLine("USAGE:");
 			writer.WriteLine($"  {GetCommandName()} [OPTIONS]");
 			writer.WriteLine("OPTIONS:");
 			writer.WriteLine("  -i, --input-file <file path> ");
 			writer.WriteLine("    The input JSON file which describes public interface of .NET Framework assemblies.");
-			writer.WriteLine("    Typically it is an output of scan_fw command with -json option.");
+			writer.WriteLine("    Typically it is an output of scan command with '--output-format json' option.");
 			writer.WriteLine("  -ie, --input-encoding <encoding name>");
 			writer.WriteLine("    The encoding of the input file.");
 			writer.WriteLine("    Currently only UTF-8 is supported if it is specified.");
@@ -200,58 +222,14 @@ namespace DotNetAPIScanner.Comparing {
 			writer.WriteLine("      encoding of Console.Out if the output is the standard output.");
 		}
 
-		protected override string GetCommandName() {
-			return "dotnet check_core.dll";
-		}
-
 		#endregion
 
 
 		#region overridables
 
-		protected virtual int Check() {
-			// load the input file
-			IReadOnlyDictionary<string, object> sourceInfo = GetSourceInfo(this.InputFilePath, this.InputEncoding);
-
-			// check the source information
-			// setup writer to write report and perform checking
-			int check(TextWriter w) {
-				this.Writer = w;
-				try {
-					return Check(sourceInfo);
-				} finally {
-					this.Writer = null;
-				}
-			}
-
-			string outputFilePath = this.OutputFilePath;
-			Encoding outputEncoding = this.OutputEncoding;
-			if (string.IsNullOrEmpty(outputFilePath)) {
-				// report to the standard output
-				if (outputEncoding == null) {
-					return check(Console.Out);
-				} else {
-					// Console.Error.Write(outputEncoding);
-					using (StreamWriter writer = new StreamWriter(Console.OpenStandardOutput(), outputEncoding)) {
-						return check(writer);
-					}
-				}
-			} else {
-				// report to file
-				if (outputEncoding == null) {
-					outputEncoding = Encoding.UTF8;
-				}
-				using (FileStream stream = File.OpenWrite(outputFilePath)) {
-					using (StreamWriter writer = new StreamWriter(stream, outputEncoding)) {
-						return check(writer);
-					}
-				}
-			}
-		}
-
 		protected abstract IReadOnlyDictionary<string, object> GetSourceInfo(string inputFilePath, Encoding encoding);
 
-		protected virtual int Check(IReadOnlyDictionary<string, object> sourceInfo) {
+		protected virtual int Compare(IReadOnlyDictionary<string, object> sourceInfo) {
 			// check arguments
 			if (sourceInfo == null) {
 				throw new ArgumentNullException(nameof(sourceInfo));
@@ -261,35 +239,35 @@ namespace DotNetAPIScanner.Comparing {
 			TextWriter writer = this.Writer;
 			Debug.Assert(writer != null);
 
-			// setup event handler and check the source information
-			Comparer checker = CreateChecker();
-			SetupChecker(checker);
+			// setup event handler and compare the source information
+			Comparer comparer = CreateComparer();
+			SetupComparer(comparer);
 
-			checker.Report += checker_Report;
+			comparer.Report += comparer_Report;
 			try {
 				// write header line to output
 				writer.Write("# ");
 				writer.WriteLine(ComparingReport.GetHeaderLine());
 
 				// check
-				return checker.Check(sourceInfo);
+				return comparer.Compare(sourceInfo);
 			} finally {
-				checker.Report -= checker_Report;
+				comparer.Report -= comparer_Report;
 			}
 		}
 
-		protected virtual Comparer CreateChecker() {
+		protected virtual Comparer CreateComparer() {
 			return new Comparer();
 		}
 
-		protected virtual void SetupChecker(Comparer checker) {
+		protected virtual void SetupComparer(Comparer comparer) {
 			// check argument
-			if (checker == null) {
-				throw new ArgumentNullException(nameof(checker));
+			if (comparer == null) {
+				throw new ArgumentNullException(nameof(comparer));
 			}
 
 			// setup checker
-			checker.Sort = true;
+			comparer.Sort = true;
 		}
 
 		#endregion
@@ -297,7 +275,7 @@ namespace DotNetAPIScanner.Comparing {
 
 		#region event handlers
 
-		private void checker_Report(object sender, CompareEventArgs e) {
+		private void comparer_Report(object sender, CompareEventArgs e) {
 			// check state
 			TextWriter writer = this.Writer;
 			if (writer == null) {

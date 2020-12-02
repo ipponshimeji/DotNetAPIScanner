@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Security.Principal;
 using System.Text;
 using static DotNetAPIScanner.Constants;
 
@@ -275,7 +274,7 @@ namespace DotNetAPIScanner.Comparing {
 
 		#region methods
 
-		public int Check(IReadOnlyDictionary<string, object> sourceInfo) {
+		public int Compare(IReadOnlyDictionary<string, object> sourceInfo) {
 			// check argument
 			if (sourceInfo == null) {
 				throw new ArgumentNullException(nameof(sourceInfo));
@@ -289,7 +288,7 @@ namespace DotNetAPIScanner.Comparing {
 			this.SourceInfo = new SourceObject(sourceInfo, name: null);
 			this.ProblemCount = 0;
 			try {
-				CheckAssemblies(this.SourceInfo);
+				CompareAssemblies(this.SourceInfo);
 			} finally {
 				this.SourceInfo = SourceObject.Null;
 			}
@@ -396,7 +395,7 @@ namespace DotNetAPIScanner.Comparing {
 
 		#region methods - scanning
 
-		protected void CheckAssemblies(SourceObject sourceInfo) {
+		protected void CompareAssemblies(SourceObject sourceInfo) {
 			// check argument
 			if (sourceInfo.Valid == false) {
 				throw SourceObject.CreateNotValidException(nameof(sourceInfo));
@@ -408,7 +407,7 @@ namespace DotNetAPIScanner.Comparing {
 				foreach (SourceObject sourceAssembly in sourceAssemblies) {
 					this.SourceAssembly = sourceAssembly;
 					try {
-						CheckAssembly(sourceAssembly);
+						CompareAssembly(sourceAssembly);
 					} finally {
 						this.SourceAssembly = SourceObject.Null;
 					}
@@ -416,7 +415,7 @@ namespace DotNetAPIScanner.Comparing {
 			}
 		}
 
-		protected void CheckAssembly(SourceObject sourceAssembly) {
+		protected void CompareAssembly(SourceObject sourceAssembly) {
 			// check argument
 			if (sourceAssembly.Valid == false) {
 				throw SourceObject.CreateNotValidException(nameof(sourceAssembly));
@@ -431,7 +430,7 @@ namespace DotNetAPIScanner.Comparing {
 			}
 
 			// check the assembly itself
-			CheckAssembly(sourceAssembly, targetAssembly);
+			CompareAssembly(sourceAssembly, targetAssembly);
 
 			// check each type in the assembly
 			IEnumerable<SourceObject> sourceTypes = sourceAssembly.GetChildSourceObjects(PropNames.Types, sort: this.Sort);
@@ -441,7 +440,7 @@ namespace DotNetAPIScanner.Comparing {
 					foreach (SourceObject sourceType in sourceTypes) {
 						this.SourceType = sourceType;
 						try {
-							CheckType(sourceType);
+							CompareType(sourceType);
 						} finally {
 							this.SourceType = SourceObject.Null;
 						}
@@ -452,7 +451,7 @@ namespace DotNetAPIScanner.Comparing {
 			}
 		}
 
-		protected void CheckType(SourceObject sourceType) {
+		protected void CompareType(SourceObject sourceType) {
 			// check argument
 			if (sourceType.Valid == false) {
 				throw SourceObject.CreateNotValidException(nameof(sourceType));
@@ -467,7 +466,7 @@ namespace DotNetAPIScanner.Comparing {
 			}
 
 			// check type itself
-			CheckType(sourceType, targetType);
+			CompareType(sourceType, targetType);
 
 			// check each member in the type
 			IEnumerable<SourceObject> sourceMembers = sourceType.GetChildSourceObjects(PropNames.Members, this.Sort);
@@ -479,7 +478,7 @@ namespace DotNetAPIScanner.Comparing {
 					foreach (SourceObject sourceMember in sourceMembers) {
 						this.SourceMember = sourceMember;
 						try {
-							CheckMember(sourceMember);
+							CompareMember(sourceMember);
 						} finally {
 							this.SourceMember = SourceObject.Null;
 						}
@@ -492,7 +491,7 @@ namespace DotNetAPIScanner.Comparing {
 			}
 		}
 
-		protected void CheckMember(SourceObject sourceMember) {
+		protected void CompareMember(SourceObject sourceMember) {
 			// check argument
 			if (sourceMember.Valid == false) {
 				throw SourceObject.CreateNotValidException(nameof(sourceMember));
@@ -502,13 +501,13 @@ namespace DotNetAPIScanner.Comparing {
 			string kind = sourceMember.GetIndispensableProperty<string>(PropNames.Kind);
 			this.SourceMemberKind = kind;
 			try {
-				CheckMember(sourceMember, kind);
+				CompareMember(sourceMember, kind);
 			} finally {
 				this.SourceMemberKind = null;
 			}
 		}
 
-		protected void CheckField(SourceObject sourceField) {
+		protected void CompareField(SourceObject sourceField) {
 			// check argument
 			if (sourceField.Valid == false) {
 				throw SourceObject.CreateNotValidException(nameof(sourceField));
@@ -523,7 +522,7 @@ namespace DotNetAPIScanner.Comparing {
 			}
 
 			// check field
-			CheckField(sourceField, targetField);
+			CompareField(sourceField, targetField);
 		}
 
 		protected SourceObject[] GetSourceParameters(SourceObject sourceMethod) {
@@ -559,7 +558,7 @@ namespace DotNetAPIScanner.Comparing {
 			// Note that this code returns the first matched method.
 			bool examineParameters(ParameterInfo[] target) {
 				for (int i = 0; i < sourceParams.Length; ++i) {
-					if (CheckTypeRef(sourceParams[i], PropNames.Type, target[i].ParameterType, report: false) == false) {
+					if (CompareTypeRef(sourceParams[i], PropNames.Type, target[i].ParameterType, report: false) == false) {
 						return false;
 					}
 				}
@@ -606,13 +605,13 @@ namespace DotNetAPIScanner.Comparing {
 			if (IsConversionOperator(sourceMethod.Name)) {
 				// op_Explicit or op_Implicit
 				// they are overloaded by its return type
-				candidateMethods = candidateMethods.Where(m => CheckTypeRef(sourceMethod, PropNames.ReturnType, m.ReturnType, report: false));
+				candidateMethods = candidateMethods.Where(m => CompareTypeRef(sourceMethod, PropNames.ReturnType, m.ReturnType, report: false));
 			}
 
 			return SelectTargetMethodByParameterTypes<MethodInfo>(sourceMethod, sourceParams, candidateMethods);
 		}
 
-		protected void CheckConstructor(SourceObject sourceCtor) {
+		protected void CompareConstructor(SourceObject sourceCtor) {
 			// check argument
 			if (sourceCtor.Valid == false) {
 				throw SourceObject.CreateNotValidException(nameof(sourceCtor));
@@ -631,19 +630,19 @@ namespace DotNetAPIScanner.Comparing {
 				}
 
 				// check constructor itself
-				CheckConstructor(sourceCtor, targetCtor);
+				CompareConstructor(sourceCtor, targetCtor);
 
 				// check each parameter in the constructor
 				Debug.Assert(sourceParams.Length == targetParams.Length);
 				for (int i = 0; i < sourceParams.Length; ++i) {
-					CheckParameter(sourceParams[i], targetParams[i], i);
+					CompareParameter(sourceParams[i], targetParams[i], i);
 				}
 			} finally {
 				this.SourceParameters = null;
 			}
 		}
 
-		protected void CheckMethod(SourceObject sourceMethod) {
+		protected void CompareMethod(SourceObject sourceMethod) {
 			// check argument
 			if (sourceMethod.Valid == false) {
 				throw SourceObject.CreateNotValidException(nameof(sourceMethod));
@@ -665,12 +664,12 @@ namespace DotNetAPIScanner.Comparing {
 				}
 
 				// check method itself
-				CheckMethod(sourceMethod, targetMethod);
+				CompareMethod(sourceMethod, targetMethod);
 
 				// check each parameter in the method
 				Debug.Assert(sourceParams.Length == targetParams.Length);
 				for (int i = 0; i < sourceParams.Length; ++i) {
-					CheckParameter(sourceParams[i], targetParams[i], i);
+					CompareParameter(sourceParams[i], targetParams[i], i);
 				}
 			} finally {
 				this.SourceParameters = null;
@@ -716,7 +715,7 @@ namespace DotNetAPIScanner.Comparing {
 			}
 		}
 
-		protected virtual void CheckAssembly(SourceObject sourceAssembly, Assembly targetAssembly) {
+		protected virtual void CompareAssembly(SourceObject sourceAssembly, Assembly targetAssembly) {
 			// check argument
 			if (sourceAssembly.Valid == false) {
 				throw SourceObject.CreateNotValidException(nameof(sourceAssembly));
@@ -741,7 +740,7 @@ namespace DotNetAPIScanner.Comparing {
 			return this.TargetAssembly.GetType(sourceType.Name);
 		}
 
-		protected virtual void CheckType(SourceObject sourceType, Type targetType) {
+		protected virtual void CompareType(SourceObject sourceType, Type targetType) {
 			// check argument
 			if (sourceType.Valid == false) {
 				throw SourceObject.CreateNotValidException(nameof(sourceType));
@@ -753,7 +752,7 @@ namespace DotNetAPIScanner.Comparing {
 			// any checks on assembly itself?
 		}
 
-		protected virtual void CheckMember(SourceObject sourceMember, string kind) {
+		protected virtual void CompareMember(SourceObject sourceMember, string kind) {
 			// check argument
 			if (sourceMember.Valid == false) {
 				throw SourceObject.CreateNotValidException(nameof(sourceMember));
@@ -765,13 +764,13 @@ namespace DotNetAPIScanner.Comparing {
 			// check depending on kind of the member
 			switch (kind) {
 				case Kinds.Field:
-					CheckField(sourceMember);
+					CompareField(sourceMember);
 					break;
 				case Kinds.Constructor:
-					CheckConstructor(sourceMember);
+					CompareConstructor(sourceMember);
 					break;
 				case Kinds.Method:
-					CheckMethod(sourceMember);
+					CompareMethod(sourceMember);
 					break;
 				default:
 					throw new ArgumentException($"Unknown value for '{PropNames.Kind}' property: {kind}", nameof(sourceMember));
@@ -791,7 +790,7 @@ namespace DotNetAPIScanner.Comparing {
 			return this.TargetType.GetField(sourceField.Name, TargetBindingFlags);
 		}
 
-		protected virtual void CheckField(SourceObject sourceField, FieldInfo targetField) {
+		protected virtual void CompareField(SourceObject sourceField, FieldInfo targetField) {
 			// check argument
 			if (sourceField.Valid == false) {
 				throw SourceObject.CreateNotValidException(nameof(sourceField));
@@ -801,14 +800,14 @@ namespace DotNetAPIScanner.Comparing {
 			}
 
 			// check field type
-			CheckTypeRef(sourceField, PropNames.Type, targetField.FieldType);
+			CompareTypeRef(sourceField, PropNames.Type, targetField.FieldType);
 		}
 
 		protected virtual (ConstructorInfo, ParameterInfo[]) GetTargetConstructor(SourceObject sourceCtor, SourceObject[] sourceParams) {
 			return SelectTargetConstructor(sourceCtor, sourceParams, this.TargetTypeConstructors);
 		}
 
-		protected virtual void CheckConstructor(SourceObject sourceCtor, ConstructorInfo targetCtor) {
+		protected virtual void CompareConstructor(SourceObject sourceCtor, ConstructorInfo targetCtor) {
 			// check argument
 			if (sourceCtor.Valid == false) {
 				throw SourceObject.CreateNotValidException(nameof(sourceCtor));
@@ -824,7 +823,7 @@ namespace DotNetAPIScanner.Comparing {
 			return SelectTargetMethod(sourceMethod, typeParamCount, sourceParams, this.TargetTypeMethods);
 		}
 
-		protected virtual void CheckMethod(SourceObject sourceMethod, MethodInfo targetMethod) {
+		protected virtual void CompareMethod(SourceObject sourceMethod, MethodInfo targetMethod) {
 			// check argument
 			if (sourceMethod.Valid == false) {
 				throw SourceObject.CreateNotValidException(nameof(sourceMethod));
@@ -834,10 +833,10 @@ namespace DotNetAPIScanner.Comparing {
 			}
 
 			// check return type
-			CheckTypeRef(sourceMethod, PropNames.ReturnType, targetMethod.ReturnType, point: "return type");
+			CompareTypeRef(sourceMethod, PropNames.ReturnType, targetMethod.ReturnType, point: "return type");
 		}
 
-		protected virtual void CheckParameter(SourceObject sourceParam, ParameterInfo targetParam, int index) {
+		protected virtual void CompareParameter(SourceObject sourceParam, ParameterInfo targetParam, int index) {
 			// check argument
 			if (sourceParam.Valid == false) {
 				throw SourceObject.CreateNotValidException(nameof(sourceParam));
@@ -849,7 +848,7 @@ namespace DotNetAPIScanner.Comparing {
 			// any check?
 		}
 
-		protected virtual bool CheckTypeRef(SourceObject source, string key, Type targetType, bool report = true, string point = null) {
+		protected virtual bool CompareTypeRef(SourceObject source, string key, Type targetType, bool report = true, string point = null) {
 			// argument checks
 			if (source.Valid == false) {
 				throw SourceObject.CreateNotValidException(nameof(source));
