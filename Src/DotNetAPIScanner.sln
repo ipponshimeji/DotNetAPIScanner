@@ -13,9 +13,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scanning", "Scanning\Scanni
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Comparing", "Comparing\Comparing.csproj", "{2A07C57E-712E-4DDF-9543-ED0BD7720748}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "compare_core", "compare_core\compare_core.csproj", "{CD4D2414-04C8-4950-8209-847C5ED2C409}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "compare_core", "compare_core\compare_core.csproj", "{CD4D2414-04C8-4950-8209-847C5ED2C409}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Tests", "Common.Tests\Common.Tests.csproj", "{543B99F0-3451-4E1F-805D-05F4153D4795}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.Tests", "Common.Tests\Common.Tests.csproj", "{543B99F0-3451-4E1F-805D-05F4153D4795}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{809FB68D-C128-45CA-883F-1086AC2D95DC}"
+	ProjectSection(SolutionItems) = preProject
+		Scripts\List-FWAssemblies.ps1 = Scripts\List-FWAssemblies.ps1
+		Scripts\ToCsv-FWAssemblies.ps1 = Scripts\ToCsv-FWAssemblies.ps1
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

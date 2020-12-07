@@ -1,0 +1,1 @@
+.\List-FWAssemblies.ps1 | Sort-Object -Property Name | ForEach-Object { "$($_.Name),$($_.PublicKeyToken),$($_.Version),$($_.Target)"}
